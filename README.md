@@ -15,3 +15,4 @@ maray
 * html webpage hahaha
 * search up how springboot supports both html and java (should be some video of soem guy doing it so you can do it too!)
 * submit presentation before march 2
+* https://pastebin.com/pb4QKAam
