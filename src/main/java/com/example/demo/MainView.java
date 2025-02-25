@@ -1,7 +1,10 @@
 package com.example.demo;
 
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -16,14 +19,27 @@ public class MainView extends VerticalLayout {
     private TextField weight = new TextField("Weight (in kg)");
     private TextField sex = new TextField("Sex at birth");
 
+    private Grid<PersonInfo> grid = new Grid<>(PersonInfo.class);
     private Binder<PersonInfo> binder = new Binder<>(PersonInfo.class);
 
-    public MainView(PersonRepository repository){
+    public MainView(PersonRepository repository) {
         this.repository = repository;
-        add(new H1("Lets get to know you: "));
 
-
-
+        add(getForm(), grid);
     }
 
+    private Component getForm() {
+
+        var layout = new HorizontalLayout();
+        add(new H1("Lets get to know you! "));
+        layout.setAlignItems(Alignment.BASELINE);
+        layout.add(firstname, lastname, height, weight, sex);
+
+        return layout;
+    }
 }
+
+
+
+
+
