@@ -11,3 +11,6 @@ public class DemoApplication {
 	}
 
 }
+
+// TO PUSH CHANGES TO GITHUB: FETCH, REBASE, PUSH
+// trying to call for static files? make sure to put ./Images/ before the file name

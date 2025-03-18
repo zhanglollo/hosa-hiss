@@ -231,6 +231,7 @@
       background-size: cover;
       background-position: center;
       position: relative;
+      overflow: hidden;
     }
 
     .journal-content {
@@ -259,6 +260,50 @@
       color: black;
     }
 
+    textarea {
+      width: 80%;
+      max-width: 600px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+
+    .snake {
+      position: absolute;
+      width: 100vw;
+      height: 80vh;
+      background-image: url('./Images/snake.jpg');
+      background-size: contain;
+      background-repeat: no-repeat;
+      animation: moveSnake 2s linear forwards;
+      display: block;
+      top: 50%;
+      left: 0;
+    }
+
+    @keyframes moveSnake {
+      0% {
+        transform: translate(-100%, -50%);
+      }
+      20% {
+        transform: translate(-75%, -20%);
+      }
+      40% {
+        transform: translate(-50%, -80%);
+      }
+      60% {
+        transform: translate(-25%, -30%);
+      }
+      80% {
+        transform: translate(0%, -70%);
+      }
+      100% {
+        transform: translate(100vw, -50%);
+      }
+    }
+
     #link {
       background-image: url('./Images/link.jpg');
       background-size: cover;
@@ -280,18 +325,6 @@
     .link h1 {
       font-size: 36px;
       margin-bottom: 20px;
-    }
-
-    .phrase {
-      text-align: center;
-      font-size: 24px;
-      margin-top: 20px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .show-phrase {
-      opacity: 1;
     }
 
     .start-button {
@@ -331,24 +364,47 @@
       }
     }
 
-    textarea {
-      width: 80%;
-      max-width: 600px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      margin-top: 20px;
-    }
-
-    .devices-screen {
+    .custom-modal {
       display: none;
-      flex-direction: column;
-      align-items: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10000;
     }
 
-    .devices-screen.visible {
-      display: flex;
+    .custom-modal p {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .custom-modal button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .custom-modal button:hover {
+      background-color: #555;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -396,7 +452,7 @@
     function transitionToTypingBox() {
       const journalSection = document.getElementById('journal');
       journalSection.innerHTML = `
-        <h1>Journal Section</h1>
+        <h1>Private Journaling</h1>
         <textarea id="journalEntry" placeholder="Start typing your thoughts here..." rows="10" cols="50"></textarea>
         <button id="deleteJournalButton" class="start-button">Delete</button>
       `;
@@ -404,9 +460,28 @@
 
       const deleteButton = document.getElementById('deleteJournalButton');
       deleteButton.addEventListener('click', function () {
-        document.getElementById('journalEntry').value = '';
-        alert('Journal entry cleared!');
+        const textarea = document.getElementById('journalEntry');
+        if (textarea.value.length > 0) {
+          clearJournalWithSnake();
+        } else {
+          alert('Journal entry is already empty!');
+        }
       });
+    }
+
+    function clearJournalWithSnake() {
+      const journalSection = document.getElementById('journal');
+      const textarea = document.getElementById('journalEntry');
+
+      textarea.value = '';
+
+      const snake = document.createElement('div');
+      snake.classList.add('snake');
+      journalSection.appendChild(snake);
+
+      setTimeout(() => {
+        snake.remove();
+      }, 2000);
     }
 
     function showDevicesScreen() {
@@ -419,7 +494,11 @@
 
       const hosaHissButton = document.getElementById('hosaHissButton');
       hosaHissButton.addEventListener('click', function () {
-        alert('Connecting to HOSA/Hiss...');
+        showModal('Connecting to HOSA/Hiss...');
+
+        setTimeout(() => {
+          showModal('Connected!');
+        }, 5000);
       });
     }
 
@@ -435,83 +514,108 @@
       showLoadingSpinner();
       setTimeout(hideLoadingSpinner, 2000);
     }, 1000);
+
+    function showModal(message) {
+      const modal = document.getElementById('customModal');
+      const overlay = document.getElementById('overlay');
+      const modalMessage = document.getElementById('modalMessage');
+
+      modalMessage.textContent = message;
+      modal.style.display = 'block';
+      overlay.style.display = 'block';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('customModal');
+      const overlay = document.getElementById('overlay');
+
+      modal.style.display = 'none';
+      overlay.style.display = 'none';
+    }
   </script>
 </head>
 <body>
-  <div class="parallax-background"></div>
+<div class="parallax-background"></div>
 
-  <div class="menu-bar">
-    <div class="logo">
-      <img src="logo.png" alt="Logo">
-      <h1>HISS</h1>
-    </div>
-    <div class="nav-links">
-      <a href="#home">Home</a>
-      <a href="#introduction">Introduction</a>
-      <a href="#chatbot">Chatbot</a>
-      <a href="#journal">Journal</a>
-      <a href="#link">Link</a>
-      <div class="emergency-button">
-        <a href="https://kidshelpphone.ca/urgent-help" target="_blank">Help</a>
-      </div>
-    </div>
+<div class="overlay" id="overlay"></div>
+<div class="custom-modal" id="customModal">
+  <p id="modalMessage">Connecting to HOSA/Hiss...</p>
+  <button onclick="closeModal()">Close</button>
+</div>
+
+<div class="menu-bar">
+  <div class="logo">
+    <img src="logo.png" alt="Logo">
+    <h1>HISS</h1>
   </div>
-
-  <div id="home" class="section">
-    <div class="home-content">
-      <h1 style="font-size: 100px; font-family: Georgia, 'Times New Roman', Times, serif;">HISS</h1>
-      <p style="font-size: 30px;">Join us on a journey to a healthier, more supported future. Experience HISS today.</p>
-    </div>
-  </div>
-
-  <div id="introduction" class="section">
-    <div class="intro-content">
-      <h1>HISS: Health Information Support System</h1>
-      <p><b>Health. Insights. Support. Simplicity.</b></p>
-      <p>Imagine a world where healthcare isn’t just about reacting to illness, but about preventing it—where you have a personal health companion guiding you every step of the way.</p>
-      <p>That’s <b>HISS</b>: The Health Information Support System.</p>
-      <p style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; font-size: 20px;">WHAT IS <b>HISS</b>?</p>
-      <p><b>HISS</b> is an AI-powered healthcare companion that provides:</p>
-      <ul>
-        <li style="text-align: left;">Instant Health Insights – Enter symptoms and receive trusted, AI-generated guidance.</li>
-        <li style="text-align: left;">Comfort & Mental Support – A Bluetooth speaker offers daily encouragement, wellness reminders, and self-care prompts.</li>
-        <li style="text-align: left;">Private Journaling – A secure space to document your thoughts, track moods, and reflect—just for you.</li>
-      </ul>
-      <p>HISS is more than just an app. It’s a companion that listens, supports, and empowers you to take control of your well-being.</p>
+  <div class="nav-links">
+    <a href="#home">Home</a>
+    <a href="#introduction">Introduction</a>
+    <a href="./Images/chatbot.html">Chatbot</a>
+    <a href="#journal">Journal</a>
+    <a href="#link">Link</a>
+    <a href="./Images/messages.html">Messages</a>
+    <div class="emergency-button">
+      <a href="https://kidshelpphone.ca/urgent-help" target="_blank">Help</a>
     </div>
   </div>
+</div>
 
-  <div id="feelings" class="section">
-    <div class="feelings-content">
-      <h1>How do you feel right now?</h1>
-      <p>Select your current feelings:</p>
-      <div class="emoji-container">
-        <div class="emoji" onclick="selectEmoji(this)">😀</div>
-        <div class="emoji" onclick="selectEmoji(this)">😐</div>
-        <div class="emoji" onclick="selectEmoji(this)">☹️</div>
-      </div>
+<div id="home" class="section">
+  <div class="home-content">
+    <h1 style="font-size: 100px; font-family: Georgia, 'Times New Roman', Times, serif;">HISS</h1>
+    <p style="font-size: 30px;">Join us on a journey to a healthier, more supported future. Experience HISS today.</p>
+  </div>
+</div>
+
+<div id="introduction" class="section">
+  <div class="intro-content">
+    <h1>HISS: Health Information Support System</h1>
+    <p><b>Health. Insights. Support. Simplicity.</b></p>
+    <p>Imagine a world where healthcare isn’t just about reacting to illness, but about preventing it—where you have a personal health companion guiding you every step of the way.</p>
+    <p>That’s <b>HISS</b>: The Health Information Support System.</p>
+    <p style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; font-size: 20px;">WHAT IS <b>HISS</b>?</p>
+    <p><b>HISS</b> is an AI-powered healthcare companion that provides:</p>
+    <ul>
+      <li style="text-align: left;">Instant Health Insights – Enter symptoms and receive trusted, AI-generated guidance.</li>
+      <li style="text-align: left;">Comfort & Mental Support – A Bluetooth speaker offers daily encouragement, wellness reminders, and self-care prompts.</li>
+      <li style="text-align: left;">Private Journaling – A secure space to document your thoughts, track moods, and reflect—just for you.</li>
+    </ul>
+    <p>HISS is more than just an app. It’s a companion that listens, supports, and empowers you to take control of your well-being.</p>
+  </div>
+</div>
+
+<div id="feelings" class="section">
+  <div class="feelings-content">
+    <h1>How do you feel right now?</h1>
+    <p>Select your current feelings:</p>
+    <div class="emoji-container">
+      <div class="emoji" onclick="selectEmoji(this)">😀</div>
+      <div class="emoji" onclick="selectEmoji(this)">😐</div>
+      <div class="emoji" onclick="selectEmoji(this)">☹️</div>
     </div>
   </div>
+</div>
 
-  <div id="chatbot" class="section">
-    <h1>Chatbot Section</h1>
-    <p>Meet your personalized health companion!</p>
-    <div id="loading-spinner" class="loading-spinner"></div>
-    <button id="startButton" class="start-button" onclick="transitionToEmptyScene()">Start</button>
-  </div>
+<div id="chatbot" class="section">
+  <h1>Chatbot</h1>
+  <p>Meet your personalized health companion!</p>
+  <div id="loading-spinner" class="loading-spinner"></div>
+  <button id="startButton" class="start-button" onclick="transitionToEmptyScene()">Start</button>
+</div>
 
-  <div id="journal" class="section">
-    <div class="journal-content">
-      <h1>Journal Section</h1>
-      <p>Log in your experience for today!</p>
-      <button id="startJournalButton" class="start-button" onclick="transitionToTypingBox()">Start</button>
-    </div>
+<div id="journal" class="section">
+  <div class="journal-content">
+    <h1>Private Journaling</h1>
+    <p>Log in your experience for today!</p>
+    <button id="startJournalButton" class="start-button" onclick="transitionToTypingBox()">Start</button>
   </div>
+</div>
 
-  <div id="link" class="section">
-    <h1>Link Section</h1>
-    <p>Link your bluetooth device.</p>
-    <button id="linkDevicesButton" class="start-button" onclick="showDevicesScreen()">Link Devices</button>
-  </div>
+<div id="link" class="section">
+  <h1>Link Devices</h1>
+  <p>Link your bluetooth device.</p>
+  <button id="linkDevicesButton" class="start-button" onclick="showDevicesScreen()">Link Devices</button>
+</div>
 </body>
 </html>
