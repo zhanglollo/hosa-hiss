@@ -3,31 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messages - HISS</title>
+    <title>Meditation Corner - HISS</title>
     <style>
         body {
           font-family: 'Times New Roman', Times, serif;
           margin: 0;
           padding: 0;
-          background-color: #123c21;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          animation: gradientBackground 15s ease infinite;
+          background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee, #84fab0, #8fd3f4, #a1c4fd, #c2e9fb);
+          background-size: 400% 400%;
         }
 
-        .menu-bar {
+        @keyframes gradientBackground {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        .top-bar {
           display: flex;
           align-items: center;
-          background-color: #6B4B3E;
-          color: white;
+          justify-content: space-between;
           padding: 10px;
           position: fixed;
-          width: 100%;
           top: 0;
+          width: 100%;
           z-index: 1000;
+          background: rgba(255, 255, 255, 0.1);
         }
 
         .logo {
           display: flex;
           align-items: center;
-          margin-right: auto;
         }
 
         .logo img {
@@ -38,156 +51,75 @@
         .logo h1 {
           margin: 0;
           font-size: 24px;
-        }
-
-        .nav-links {
-          display: flex;
-          justify-content: flex-end;
-          flex: 1;
-        }
-
-        .nav-links a {
           color: white;
-          text-decoration: none;
-          margin: 0 15px;
-          font-size: 18px;
-          cursor: pointer;
         }
 
-        .nav-links a:hover {
-          text-decoration: underline;
-        }
-
-        .emergency-button {
-          margin-left: auto;
-        }
-
-        .emergency-button a {
-          background-color: red;
-          color: white;
-          text-decoration: none;
-          padding: 10px 15px;
-          border-radius: 5px;
-          font-size: 18px;
-          animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.1);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        .messages-content {
-          background-color: rgba(255, 255, 255, 0.9);
-          padding: 40px;
-          border-radius: 10px;
-          text-align: center;
-          max-width: 800px;
-          margin: 100px auto 20px;
-          position: relative;
-          z-index: 1;
-        }
-
-        .messages-content h1 {
-          font-size: 36px;
-          margin-bottom: 20px;
-        }
-
-        .messages-list {
-          text-align: left;
-          margin-bottom: 20px;
-        }
-
-        .messages-list p {
-          font-size: 18px;
-          line-height: 1.6;
-          margin-bottom: 10px;
-        }
-
-        .add-message {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-top: 20px;
-        }
-
-        .add-message input {
-          width: 60%;
-          padding: 10px;
-          font-size: 16px;
-          border-radius: 5px;
-          border: 1px solid #ccc;
-          margin-right: 10px;
-        }
-
-        .add-message button {
-          padding: 10px 20px;
-          background-color: #333;
+        .exit-button {
+          background-color: rgba(255, 255, 255, 0.2);
           color: white;
           border: none;
+          padding: 10px 20px;
           border-radius: 5px;
-          font-size: 16px;
           cursor: pointer;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
         }
 
-        .add-message button:hover {
-          background-color: #555;
+        .exit-button:hover {
+          background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .video-container {
+          position: relative;
+          width: 100%;
+          max-width: 800px;
+          margin: 0 auto;
+          text-align: center;
+        }
+
+        .video-container iframe {
+          width: 100%;
+          height: 450px;
+          border: none;
+          border-radius: 10px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .description {
+          font-size: 18px;
+          line-height: 1.6;
+          margin-top: 20px;
+          color: white;
+          text-align: center;
+          position: absolute;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100%;
+          max-width: 800px;
         }
     </style>
 </head>
 <body>
-<div class="menu-bar">
+<div class="top-bar">
     <div class="logo">
         <img src="logo.png" alt="Logo">
         <h1>HISS</h1>
     </div>
-    <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="index.html#introduction">Introduction</a>
-        <a href="index.html#chatbot">Chatbot</a>
-        <a href="index.html#journal">Journal</a>
-        <a href="index.html#link">Link</a>
-        <a href="messages.html">Messages</a>
-        <div class="emergency-button">
-            <a href="https://kidshelpphone.ca/urgent-help" target="_blank">Help</a>
-        </div>
-    </div>
+    <button class="exit-button" onclick="window.location.href='index.html'">Exit</button>
 </div>
 
-<div class="messages-content">
-    <h1>Hi, Hosa!</h1>
-    <div class="messages-list" id="messagesList">
-        <p>Remember to drink more water!</p>
-        <p>Remember to take breaks after 30 minutes of studying!</p>
-    </div>
-    <div class="add-message">
-        <input type="text" id="newMessage" placeholder="Add a new message...">
-        <button onclick="addMessage()">Add</button>
-    </div>
+<div class="video-container">
+    <iframe
+            src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+    ></iframe>
 </div>
 
-<script>
-
-    function addMessage() {
-      const newMessageInput = document.getElementById('newMessage');
-      const messagesList = document.getElementById('messagesList');
-
-      if (newMessageInput.value.trim() !== '') {
-        const newMessage = document.createElement('p');
-        newMessage.textContent = newMessageInput.value;
-        messagesList.appendChild(newMessage);
-        newMessageInput.value = '';
-      } else {
-        alert('Please enter a message!');
-      }
-    }
-</script>
+<div class="description">
+    <p>Welcome to the Meditation Corner. Take a moment to relax and unwind with this calming livestream. Let the soothing sounds and visuals guide you into a state of peace and mindfulness.</p>
+    <p>Feel free to pause, close your eyes, and focus on your breathing. This is your time to recharge and find inner calm.</p>
+</div>
 </body>
 </html>
