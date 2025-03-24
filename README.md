@@ -16,7 +16,7 @@ Journaling is a somewhat common practice, but sadly many teenagers frown upon it
 
 ### Meditation Corner
 
-Meditating is a not very popular activity among teenagers, but many can relate to listening to music while working. Utilizing the ZenGlow, users are able to listen to music and be provided with ambient lighting to help teenagers calm down and meditate or do whatever they need that may need a calming atmosphere. 
+Meditating is a not very popular activity among teenagers, but many can relate to listening to music while working. Utilizing the Serenity Buds, users are able to listen to music and be provided with ambient lighting to help teenagers calm down and meditate or do whatever they need that may need a calming atmosphere. 
 
 ## DEVELOPMENT
 
