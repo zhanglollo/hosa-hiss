@@ -28,4 +28,6 @@ Millions of people struggle with uncertainty about their health every day. Many 
 Our mission with this project is simple but impactful: to make healthcare guidance easy, affordable, and accessible for everyone, regardless of background or location and to let the world know how useful AI is for healthcare. Through an intuitive user interface and evidence-based recommendations, this app aims to reduce unnecessary medical visits, lower healthcare costs, and empower individuals to practice preventive care in a way that’s both proactive and manageable.
 
 
-Built using [Springboot](https://spring.io/projects/spring-boot).
+
+> [!NOTE]
+> Built using [Springboot](https://spring.io/projects/spring-boot) and includes [Claude AI](https://www.anthropic.com/).
