@@ -6,7 +6,7 @@
   <title>HISS</title>
   <style>
     body {
-      font-family: 'Times New Roman', Times, serif;
+      font-family: 'Franklin Gothic Medium', Arial, sans-serif;
       margin: 0;
       padding: 0;
       scroll-behavior: smooth;
@@ -126,7 +126,7 @@
     }
 
     .home-content {
-      background-color: rgba(155, 226, 155, 0.7);
+      background-color: rgba(164, 221, 168, 0.7);
       padding: 40px;
       border-radius: 10px;
       text-align: center;
@@ -342,6 +342,8 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
+    let selectedMood = null;
+
     document.addEventListener("DOMContentLoaded", function () {
       const sections = document.querySelectorAll(".section");
 
@@ -374,14 +376,34 @@
       setTimeout(() => {
         emoji.style.transform = 'scale(1)';
       }, 300);
+
+      if (emoji.textContent === '😀') {
+        selectedMood = 'happy';
+      } else if (emoji.textContent === '😐') {
+        selectedMood = 'neutral';
+      } else if (emoji.textContent === '☹️') {
+        selectedMood = 'sad';
+      }
+
+      updateJournalPrompt();
     }
 
     function transitionToTypingBox() {
       const journalSection = document.getElementById('journal');
+      let promptText = "Start typing your thoughts here...";
+
+      if (selectedMood === 'happy') {
+        promptText = "Awesome! What made your day so great?";
+      } else if (selectedMood === 'neutral') {
+        promptText = "Okay, tell me about your day...";
+      } else if (selectedMood === 'sad') {
+        promptText = "What's wrong? I'm here to listen...";
+      }
+
       journalSection.innerHTML = `
         <h1>Thought Sanctuary</h1>
-        <textarea id="journalEntry" placeholder="Start typing your thoughts here..." rows="10" cols="50"></textarea>
-        <button id="deleteJournalButton" class="start-button">Eat your thoughts!</button>
+        <textarea id="journalEntry" placeholder="${promptText}" rows="10" cols="50"></textarea>
+        <button id="deleteJournalButton" class="start-button">Eat</button>
       `;
       journalSection.style.backgroundColor = '#7ab690';
 
@@ -394,6 +416,21 @@
           alert('Journal entry is already empty!');
         }
       });
+    }
+
+    function updateJournalPrompt() {
+      const journalSection = document.getElementById('journal');
+      const textarea = document.getElementById('journalEntry');
+
+      if (textarea) {
+        if (selectedMood === 'happy') {
+          textarea.placeholder = "Awesome! What made your day so great?";
+        } else if (selectedMood === 'neutral') {
+          textarea.placeholder = "Okay, tell me about your day...";
+        } else if (selectedMood === 'sad') {
+          textarea.placeholder = "What's wrong? I'm here to listen...";
+        }
+      }
     }
 
     function clearJournalWithSnake() {
@@ -446,21 +483,15 @@
 <body>
 <div class="parallax-background"></div>
 
-<div class="overlay" id="overlay"></div>
-<div class="custom-modal" id="customModal">
-  <p id="modalMessage">Connecting to HOSA/Hiss...</p>
-  <button onclick="closeModal()">Close</button>
-</div>
-
 <div class="menu-bar">
   <div class="logo">
-    <img src="logo.png" alt="Logo">
+    <img src="./Images/logo.jpg" alt="Logo">
     <h1>HISS</h1>
   </div>
   <div class="nav-links">
     <a href="#home">Home</a>
     <a href="#introduction">Introduction</a>
-    <a href="./Images/chatbot.html">Therapist</a>
+    <a href="./Images/chat.html">Therapist</a>
     <a href="#journal">Thought Sancutuary</a>
     <a href="./Images/messages.html">Meditation Corner</a>
     <div class="emergency-button">
@@ -480,8 +511,8 @@
   <div class="intro-content">
     <h1>HISS: Health Information Support System</h1>
     <p><b>Health. Insights. Support. Simplicity.</b></p>
-    <p>Imagine a world where healthcare isn’t just about reacting to illness, but about preventing it—where you have a personal health companion guiding you every step of the way.</p>
-    <p>That’s <b>HISS</b>: The Health Information Support System.</p>
+    <p>Imagine a world where healthcare isn't just about reacting to illness, but about preventing it—where you have a personal health companion guiding you every step of the way.</p>
+    <p>That's <b>HISS</b>: The Health Information Support System.</p>
     <p style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; font-size: 20px;">WHAT IS <b>HISS</b>?</p>
     <p><b>HISS</b> is an AI-powered healthcare companion that provides:</p>
     <ul>
@@ -489,7 +520,7 @@
       <li style="text-align: left;">Comfort & Mental Support – A Bluetooth speaker offers daily encouragement, wellness reminders, and self-care prompts.</li>
       <li style="text-align: left;">Thought Sancutuary – A secure space to document your thoughts, track moods, and reflect—just for you.</li>
     </ul>
-    <p>HISS is more than just an app. It’s a companion that listens, supports, and empowers you to take control of your well-being.</p>
+    <p>HISS is more than just an app. It's a companion that listens, supports, and empowers you to take control of your well-being.</p>
   </div>
 </div>
 
@@ -509,7 +540,7 @@
   <h1>Therapist</h1>
   <p>Meet your personalized health companion!</p>
   <div id="loading-spinner" class="loading-spinner"></div>
-  <button id="startButton" class="start-button" onclick="window.location.href='chatbot.html'">Start</button>
+  <button id="startButton" class="start-button" onclick="window.location.href='./Images/chat.html'">Start</button>
 </div>
 
 <div id="journal" class="section">

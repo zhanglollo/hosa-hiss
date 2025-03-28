@@ -7,41 +7,50 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .message-content {
-        white-space: pre-wrap;
-        word-wrap: break-word;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
-    .message-content code {
-        background-color: #f0f0f0;
-        padding: 2px 4px;
-        border-radius: 4px;
-        font-family: monospace;
+    #chat-messages {
+      min-height: 300px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .typing-indicator::after {
+      content: '...';
+      animation: typing 1s infinite;
+    }
+    @keyframes typing {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
     }
   </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col">
-<div class="container mx-auto p-4 flex-1 flex flex-col">
-  <h1 class="text-2xl font-bold mb-4 text-center text-gray-800">AI Chatbot</h1>
+<body class="bg-gray-100 min-h-screen">
+<div class="container mx-auto p-4 max-w-3xl">
+  <h1 class="text-3xl font-bold mb-6 text-center text-blue-600">AI Chat Assistant</h1>
 
-  <div class="flex-1 overflow-y-auto mb-4 p-4 bg-white rounded-lg shadow">
-    <div id="chat-messages" class="space-y-4"></div>
+  <div id="chat-container" class="bg-white rounded-lg shadow-md p-4 mb-4">
+    <div id="chat-messages" class="space-y-4 mb-4">
+      <div class="message assistant-message flex mb-4">
+        <div class="flex-shrink-0 mr-3 font-bold text-green-600">Assistant:</div>
+        <div class="message-content bg-gray-100 p-3 rounded-lg flex-1">
+          Hello! How can I assist you today?
+        </div>
+      </div>
+    </div>
+
+    <form id="chat-form" class="flex gap-2">
+      <input type="text" id="message-input"
+             placeholder="Type your message here..."
+             class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+             autocomplete="off" required>
+      <button type="submit"
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+        Send
+      </button>
+    </form>
   </div>
-
-  <form id="chat-form" class="flex items-center">
-    <input
-            type="text"
-            id="message-input"
-            name="message"
-            placeholder="Type your message..."
-            class="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-    >
-    <button
-            type="submit"
-            class="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    >
-      Send
-    </button>
-  </form>
 </div>
 
 <script>
@@ -49,68 +58,92 @@
   const messageInput = document.getElementById('message-input');
   const chatMessages = document.getElementById('chat-messages');
 
-  chatForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const message = messageInput.value;
-      if (!message) return;
+  chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = messageInput.value.trim();
+    if (!message) return;
 
-      // Add user message to chat
-      addMessageToChat('User', message);
+    // Add user message
+    addMessage('user', message);
+    messageInput.value = '';
 
-      messageInput.value = '';
+    // Add typing indicator
+    const botMessageId = 'msg-' + Date.now();
+    addMessage('assistant', '<span class="typing-indicator"></span>', botMessageId);
+    const botMessageElement = document.getElementById(botMessageId);
+    const contentElement = botMessageElement.querySelector('.message-content');
 
-      // Fetch streaming data from the server
-      try {
-          const response = await fetchStreamWithRetry('/stream?message=' + encodeURIComponent(message));
-          const reader = response.body.getReader();
-          let botMessageElement = addMessageToChat('Bot', '');
-          let contentElement = botMessageElement.querySelector('.message-content');
-          await processStream(reader, contentElement);
-      } catch (error) {
-          console.error('Error fetching chatbot response:', error);
-          addMessageToChat('System', 'An error occurred while fetching the response. Please try again.');
+    try {
+      const response = await fetch(`/chat/stream?message=${encodeURIComponent(message)}`, {
+        headers: { 'Accept': 'text/event-stream' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let isFirstChunk = true;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Handle cases where multiple chunks arrive together
+        const chunks = buffer.split('data: ');
+        buffer = chunks.pop() || ''; // Save incomplete chunk
+
+        for (const chunk of chunks) {
+          const data = chunk.trim();
+          if (!data || data === '[DONE]') continue;
+
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices?.[0]?.delta?.content || '';
+
+            if (content) {
+              if (isFirstChunk) {
+                contentElement.innerHTML = content; // Replace typing indicator
+                isFirstChunk = false;
+              } else {
+                contentElement.textContent += content; // Append subsequent chunks
+              }
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+          } catch (err) {
+            console.error('Failed to parse:', data, err);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      contentElement.innerHTML = '';
+      contentElement.textContent = 'Error: ' + error.message;
+      contentElement.classList.add('text-red-500');
+    }
   });
 
-  async function fetchStreamWithRetry(url, retries = 3) {
-      for (let i = 0; i < retries; i++) {
-          try {
-              const response = await fetch(url);
-              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-              return response;
-          } catch (e) {
-              console.error(`Attempt ${i + 1} failed: ${e.message}`);
-              if (i === retries - 1) throw e;
-              await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-      }
-  }
+  function addMessage(role, content, id = '') {
+    const messageElement = document.createElement('div');
+    if (id) messageElement.id = id;
 
-  async function processStream(reader, contentElement) {
-      const decoder = new TextDecoder("utf-8");
-      try {
-          while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              contentElement.innerHTML += decoder.decode(value, { stream: true });
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-          }
-      } catch (error) {
-          console.error('Error processing stream:', error);
-          contentElement.innerHTML += '<br>[Error: Stream interrupted. Please try again.]';
-      }
-  }
+    messageElement.className = `message ${role}-message flex mb-4`;
+    messageElement.innerHTML = `
+      <div class="flex-shrink-0 mr-3 font-bold ${role === 'user' ? 'text-blue-600' : 'text-green-600'}">
+        ${role === 'user' ? 'You:' : 'Assistant:'}
+      </div>
+      <div class="message-content bg-${role === 'user' ? 'blue' : 'gray'}-100 p-3 rounded-lg flex-1">
+        ${content}
+      </div>
+    `;
 
-  function addMessageToChat(sender, content) {
-      const messageElement = document.createElement('div');
-      messageElement.className = `${sender.toLowerCase()}-message ${sender === 'User' ? 'bg-blue-100' : 'bg-gray-100'} p-3 rounded-lg`;
-      messageElement.innerHTML = `
-          <div class="font-bold ${sender === 'User' ? 'text-blue-600' : 'text-green-600'}">${sender}:</div>
-          <div class="message-content">${content}</div>
-      `;
-      chatMessages.appendChild(messageElement);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      return messageElement;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return messageElement;
   }
 </script>
 </body>
